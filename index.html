@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI4RPT Pilot</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    text-align: center;
+    color: #2e7d32;
+}
+select, textarea, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+button {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #1b5e20;
+}
+.response {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e8f5e9;
+    border-radius: 6px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>AI4RPT Advisory Pilot</h1>
+
+<label>Select Crop:</label>
+<select id="crop">
+<option value="maize">Maize</option>
+<option value="rice">Rice</option>
+<option value="cassava">Cassava</option>
+</select>
+
+<label>Describe the issue:</label>
+<textarea id="issue" rows="4" placeholder="e.g. Yellow leaves, insects, low yield..."></textarea>
+
+<button onclick="generateAdvice()">Get Advice</button>
+
+<div class="response" id="response" style="display:none;"></div>
+
+</div>
+
+<script>
+function generateAdvice() {
+    const crop = document.getElementById("crop").value;
+    const issue = document.getElementById("issue").value;
+    const responseDiv = document.getElementById("response");
+
+    let advice = "";
+
+    if(issue.toLowerCase().includes("yellow")) {
+        advice = "Yellow leaves may indicate nutrient deficiency. Consider nitrogen fertilizer and check soil drainage.";
+    } else if(issue.toLowerCase().includes("insect")) {
+        advice = "Possible pest infestation. Inspect leaves carefully and consider safe pesticide or neem-based treatment.";
+    } else if(issue.toLowerCase().includes("low yield")) {
+        advice = "Low yield may result from poor soil fertility or irregular rainfall. Consider soil testing and improved seed variety.";
+    } else {
+        advice = "Thank you. We recommend field inspection and local agronomist consultation for more accurate diagnosis.";
+    }
+
+    responseDiv.style.display = "block";
+    responseDiv.innerHTML = "<strong>Crop:</strong> " + crop + "<br><br><strong>Advice:</strong><br>" + advice;
+}
+</script>
+
+</body>
+</html>
