@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI4RPT Pilot (V2) — Planting Guidance</title>
+  <style>
+    :root { --g:#1b5e20; --bg:#f4f6f8; --card:#fff; --muted:#6b7280; }
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;padding:18px;}
+    .wrap{max-width:620px;margin:0 auto;background:var(--card);border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,.08);padding:18px;}
+    h1{margin:6px 0 2px;color:var(--g);font-size:20px;text-align:center;}
+    .sub{margin:0 0 14px;color:var(--muted);text-align:center;font-size:13px;line-height:1.35}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;}
+    .lang{margin-left:auto;border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+    label{display:block;font-size:13px;color:#111827;margin:10px 0 6px;}
+    input, select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;box-sizing:border-box;background:#fff;}
+    button.primary{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:16px;cursor:pointer;}
+    button.primary:hover{filter:brightness(.95);}
+    .out{margin-top:14px;background:#e8f5e9;border-radius:12px;padding:14px;display:none;}
+    .k{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.35}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #c7e6cc;font-size:12px;margin-top:6px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:560px){.grid{grid-template-columns:1fr}}
+    .hr{height:1px;background:#e5e7eb;margin:14px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row">
+      <div style="width:100%">
+        <h1 id="title">AI4RPT Pilot (V2) — Planting Guidance</h1>
+        <p class="sub" id="subtitle">
+          Farmer-friendly pilot for co-building. Uses simple rules (not official meteorological forecasts).
+        </p>
+      </div>
+      <button class="lang" id="langBtn" type="button">EN</button>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label id="l_state">State</label>
+        <input id="state" placeholder="e.g., Kwara" />
+      </div>
+      <div>
+        <label id="l_lga">LGA</label>
+        <input id="lga" placeholder="e.g., Moro" />
+      </div>
+      <div>
+        <label id="l_comm">Community / Village</label>
+        <input id="community" placeholder="e.g., Malete" />
+      </div>
+      <div>
+        <label id="l_crop">Crop</label>
+        <select id="crop">
+          <option value="maize">Maize</option>
+          <option value="rice">Rice</option>
+          <option value="cassava">Cassava</option>
+          <option value="tomato">Tomato</option>
+          <option value="sorghum">Sorghum</option>
+          <option value="vegetables">Vegetables</option>
+        </select>
+      </div>
+      <div>
+        <label id="l_month">Current month</label>
+        <select id="month">
+          <option>January</option><option>February</option><option>March</option><option>April</option>
+          <option>May</option><option>June</option><option>July</option><option>August</option>
+          <option>September</option><option>October</option><option>November</option><option>December</option>
+        </select>
+      </div>
+      <div>
+        <label id="l_early">Have early rains started?</label>
+        <select id="earlyRains">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      <div>
+        <label id="l_breaks">Do early rains stop again (dry breaks)?</label>
+        <select id="dryBreaks">
+          <option value="unknown">Not sure</option>
+          <option value="often">Often</option>
+          <option value="rare">Rarely</option>
+        </select>
+      </div>
+      <div>
+        <label id="l_soil">Current soil condition</label>
+        <select id="soil">
+          <option value="dry">Dry</option>
+          <option value="moist">Moist</option>
+          <option value="wet">Wet</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="primary" type="button" id="predictBtn">Get Planting Guidance</button>
+
+    <div class="out" id="out">
+      <div><strong id="o_head">Result</strong></div>
+      <div class="pill" id="o_ready"></div>
+
+      <div class="hr"></div>
+
+      <div><strong id="o_action_label">Recommended action:</strong> <span id="o_action"></span></div>
+      <div style="margin-top:8px"><strong id="o_reason_label">Why:</strong> <span id="o_reason"></span></div>
+
+      <div class="hr"></div>
+
+      <div><strong id="o_next_label">Next steps:</strong>
+        <ul style="margin:8px 0 0 18px; padding:0" id="o_steps"></ul>
+      </div>
+
+      <div class="k" id="o_note"></div>
+    </div>
+
+    <p class="k" id="foot">
+      Tip: During farmer testing, record whether the guidance was correct. That feedback will be used to calibrate the full AI model later.
+    </p>
+  </div>
+
+<script>
+  let lang = "EN";
+
+  const T = {
+    EN: {
+      title:"AI4RPT Pilot (V2) — Planting Guidance",
+      subtitle:"Farmer-friendly pilot for co-building. Uses simple rules (not official meteorological forecasts).",
+      state:"State", lga:"LGA", comm:"Community / Village", crop:"Crop", month:"Current month",
+      early:"Have early rains started?", breaks:"Do early rains stop again (dry breaks)?", soil:"Current soil condition",
+      btn:"Get Planting Guidance", result:"Result",
+      readyHigh:"High readiness", readyMed:"Moderate readiness", readyLow:"Low readiness",
+      action:"Recommended action:", why:"Why:", next:"Next steps:",
+      note:"Pilot logic only. Next version (B) will estimate onset/stability & rainy-season length using real location rainfall time-series."
+    },
+    FR: {
+      title:"AI4RPT Pilote (V2) — Conseil de semis",
+      subtitle:"Pilote orienté agriculteurs (co-construction). Règles simples (pas une prévision météo officielle).",
+      state:"État", lga:"LGA", comm:"Communauté / Village", crop:"Culture", month:"Mois actuel",
+      early:"Les premières pluies ont-elles commencé ?", breaks:"Y a-t-il des pauses sèches après les premières pluies ?",
+      soil:"État actuel du sol",
+      btn:"Obtenir un conseil de semis", result:"Résultat",
+      readyHigh:"Préparation élevée", readyMed:"Préparation moyenne", readyLow:"Préparation faible",
+      action:"Action recommandée :", why:"Pourquoi :", next:"Prochaines étapes :",
+      note:"Logique pilote. La version (B) estimera début/stabilité & durée de la saison des pluies avec des séries réelles par localité."
+    }
+  };
+
+  function setLang(newLang){
+    lang = newLang;
+    document.getElementById("langBtn").textContent = lang;
+    const L = T[lang];
+    document.getElementById("title").textContent = L.title;
+    document.getElementById("subtitle").textContent = L.subtitle;
+    document.getElementById("l_state").textContent = L.state;
+    document.getElementById("l_lga").textContent = L.lga;
+    document.getElementById("l_comm").textContent = L.comm;
+    document.getElementById("l_crop").textContent = L.crop;
+    document.getElementById("l_month").textContent = L.month;
+    document.getElementById("l_early").textContent = L.early;
+    document.getElementById("l_breaks").textContent = L.breaks;
+    document.getElementById("l_soil").textContent = L.soil;
+    document.getElementById("predictBtn").textContent = L.btn;
+    document.getElementById("o_head").textContent = L.result;
+    document.getElementById("o_action_label").textContent = L.action;
+    document.getElementById("o_reason_label").textContent = L.why;
+    document.getElementById("o_next_label").textContent = L.next;
+    document.getElementById("o_note").textContent = L.note;
+  }
+
+  document.getElementById("langBtn").addEventListener("click", ()=>{
+    setLang(lang === "EN" ? "FR" : "EN");
+  });
+
+  // --- Pilot rule engine (A-version): outputs actionable guidance ---
+  function guidance(month, earlyRains, dryBreaks, soil, crop){
+    // Month to season stage (Nigeria-like pattern; this is pilot logic)
+    const m = month.toLowerCase();
+    let seasonStage = "pre"; // pre-season, onset, mid
+    if (["january","february"].includes(m)) seasonStage = "pre";
+    if (["march","april"].includes(m)) seasonStage = "onset";
+    if (["may","june","july"].includes(m)) seasonStage = "stable";
+    if (["august","september"].includes(m)) seasonStage = "mid";
+    if (["october","november","december"].includes(m)) seasonStage = "late";
+
+    // Readiness score
+    let score = 0;
+    if (seasonStage === "pre") score += 0;
+    if (seasonStage === "onset") score += 2;
+    if (seasonStage === "stable") score += 4;
+    if (seasonStage === "mid") score += 3;
+    if (seasonStage === "late") score += 1;
+
+    if (earlyRains === "yes") score += 2;
+    if (soil === "moist") score += 1;
+    if (soil === "wet") score += 2;
+
+    if (dryBreaks === "often") score -= 2;
+    if (dryBreaks === "rare") score += 1;
+
+    // Crop sensitivity (pilot)
+    const sensitive = ["maize","tomato","vegetables","rice"].includes(crop);
+    if (sensitive && seasonStage === "onset" && dryBreaks === "often") score -= 1;
+
+    let readiness = "low";
+    if (score >= 6) readiness = "high";
+    else if (score >= 4) readiness = "med";
+
+    // Action
+    let action = "";
+    let reason = "";
+    let steps = [];
+
+    if (readiness === "low"){
+      action = (lang==="EN") ? "Wait. Prepare land and inputs." : "Attendre. Préparer le champ et les intrants.";
+      reason = (lang==="EN")
+        ? "Signals suggest rains are not yet stable in your area."
+        : "Les indicateurs suggèrent que les pluies ne sont pas encore stables.";
+      steps = (lang==="EN")
+        ? ["Clear/prepare land", "Secure quality seed", "Monitor first rains for 2–3 weeks", "Avoid fertilizer application before stable rains"]
+        : ["Défricher/préparer le champ", "Obtenir des semences de qualité", "Observer les premières pluies pendant 2–3 semaines", "Éviter l’engrais avant la stabilité"];
+    } else if (readiness === "med"){
+      action = (lang==="EN") ? "Prepare to plant soon (early planting with caution)." : "Se préparer à semer bientôt (avec prudence).";
+      reason = (lang==="EN")
+        ? "Early rains/soil moisture are present, but dry breaks may still happen."
+        : "Des pluies précoces/humidité du sol existent, mais des pauses sèches peuvent survenir.";
+      steps = (lang==="EN")
+        ? ["Use early-maturing varieties if available", "Plant on part of the land first", "Keep seed for replanting if dry breaks occur", "Plan drainage in low-lying plots"]
+        : ["Utiliser des variétés précoces si possible", "Semer d’abord sur une partie du champ", "Garder des semences pour re-semer en cas de pause sèche", "Prévoir le drainage des bas-fonds"];
+    } else {
+      action = (lang==="EN") ? "Plant now (conditions appear stable)." : "Semer maintenant (conditions plutôt stables).";
+      reason = (lang==="EN")
+        ? "Season signals and soil condition suggest rains are stable enough for planting."
+        : "Les signaux saisonniers et l’état du sol suggèrent une stabilité suffisante.";
+      steps = (lang==="EN")
+        ? ["Plant across the main plot", "Apply fertilizer after establishment (not before heavy rain)", "Maintain drainage and weed control", "Record rainfall/field notes for better local calibration"]
+        : ["Semer sur la parcelle principale", "Appliquer l’engrais après l’installation (pas avant fortes pluies)", "Assurer drainage et désherbage", "Noter pluie/observations pour améliorer la calibration locale"];
+    }
+
+    return {readiness, action, reason, steps};
+  }
+
+  document.getElementById("predictBtn").addEventListener("click", ()=>{
+    const month = document.getElementById("month").value;
+    const earlyRains = document.getElementById("earlyRains").value;
+    const dryBreaks = document.getElementById("dryBreaks").value;
+    const soil = document.getElementById("soil").value;
+    const crop = document.getElementById("crop").value;
+
+    const out = document.getElementById("out");
+    out.style.display = "block";
+
+    const g = guidance(month, earlyRains, dryBreaks, soil, crop);
+
+    const L = T[lang];
+    const readyText =
+      g.readiness === "high" ? L.readyHigh :
+      g.readiness === "med" ? L.readyMed : L.readyLow;
+
+    document.getElementById("o_ready").textContent = readyText;
+    document.getElementById("o_action").textContent = g.action;
+    document.getElementById("o_reason").textContent = g.reason;
+
+    const ul = document.getElementById("o_steps");
+    ul.innerHTML = "";
+    g.steps.forEach(s=>{
+      const li = document.createElement("li");
+      li.textContent = s;
+      ul.appendChild(li);
+    });
+  });
+
+  setLang("EN");
+</script>
+</body>
+</html>
