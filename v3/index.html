@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI4RPT Pilot (V3) — Rain Onset & Season Guidance</title>
+  <link rel="manifest" href="/ai4rpt-demo/manifest.json">
+<meta name="theme-color" content="#1b5e20">
   <style>
     :root { --g:#1b5e20; --bg:#f4f6f8; --card:#fff; --muted:#6b7280; --warn:#b45309; --danger:#b91c1c; --ok:#065f46; }
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;padding:18px;}
@@ -32,7 +34,7 @@
     @media (max-width:720px){ .grid{grid-template-columns:1fr;} }
   </style>
 </head>
-<body>
+  <body>
   <div class="wrap">
     <header>
       <div>
@@ -409,6 +411,13 @@
     document.getElementById("month").selectedIndex = now.getMonth();
     setLang("en");
   })();
+</script>
+    <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/ai4rpt-demo/service-worker.js");
+    });
+  }
 </script>
 </body>
 </html>
