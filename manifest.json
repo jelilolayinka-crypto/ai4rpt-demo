@@ -1,0 +1,21 @@
+{
+  "name": "AI4RPT – Farmer Advisory",
+  "short_name": "AI4RPT",
+  "start_url": "/ai4rpt-demo/v3/",
+  "scope": "/ai4rpt-demo/",
+  "display": "standalone",
+  "background_color": "#f7fafc",
+  "theme_color": "#1b5e20",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
