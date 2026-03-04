@@ -1,95 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI4RPT Pilot</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 20px;
-}
-.container {
-    max-width: 500px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-h1 {
-    text-align: center;
-    color: #2e7d32;
-}
-select, textarea, button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-}
-button {
-    background: #2e7d32;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-button:hover {
-    background: #1b5e20;
-}
-.response {
-    margin-top: 20px;
-    padding: 15px;
-    background: #e8f5e9;
-    border-radius: 6px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI4RPT Demo — Rainfall Prediction</title>
+  <style>
+    :root { --g:#1b5e20; --bg:#f4f6f8; --card:#fff; --muted:#6b7280; }
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;padding:18px;}
+    .wrap{max-width:560px;margin:0 auto;background:var(--card);border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,.08);padding:18px;}
+    h1{margin:6px 0 2px;color:var(--g);font-size:20px;text-align:center;}
+    .sub{margin:0 0 14px;color:var(--muted);text-align:center;font-size:13px;}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;}
+    .lang{margin-left:auto;border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+    label{display:block;font-size:13px;color:#111827;margin:10px 0 6px;}
+    input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:16px;box-sizing:border-box;}
+    button.primary{width:100%;margin-top:14px;padding:12px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:16px;cursor:pointer;}
+    button.primary:hover{filter:brightness(.95);}
+    .out{margin-top:14px;background:#e8f5e9;border-radius:12px;padding:14px;display:none;}
+    .k{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.35}
+    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #c7e6cc;font-size:12px;margin-top:6px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:520px){.grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-<div class="container">
-<h1>AI4RPT Advisory Pilot</h1>
+  <div class="wrap">
+    <div class="row">
+      <div style="width:100%">
+        <h1 id="title">AI4RPT Demo — Rainfall Prediction</h1>
+        <p class="sub" id="subtitle">Pilot tool for co-building with farmers (offline-ready demo logic)</p>
+      </div>
+      <button class="lang" id="langBtn" type="button">EN</button>
+    </div>
 
-<label>Select Crop:</label>
-<select id="crop">
-<option value="maize">Maize</option>
-<option value="rice">Rice</option>
-<option value="cassava">Cassava</option>
-</select>
+    <div class="grid">
+      <div>
+        <label id="l_hum">Humidity (%)</label>
+        <input id="humidity" type="number" inputmode="decimal" placeholder="e.g., 75" />
+      </div>
+      <div>
+        <label id="l_temp">Temperature (°C)</label>
+        <input id="temperature" type="number" inputmode="decimal" placeholder="e.g., 28" />
+      </div>
+      <div>
+        <label id="l_frost">Frost-free days</label>
+        <input id="frost" type="number" inputmode="decimal" placeholder="e.g., 25" />
+      </div>
+      <div>
+        <label id="l_yield">Crop yield (any unit)</label>
+        <input id="yield" type="number" inputmode="decimal" placeholder="e.g., 120" />
+      </div>
+    </div>
 
-<label>Describe the issue:</label>
-<textarea id="issue" rows="4" placeholder="e.g. Yellow leaves, insects, low yield..."></textarea>
+    <button class="primary" type="button" id="predictBtn">Predict</button>
 
-<button onclick="generateAdvice()">Get Advice</button>
+    <div class="out" id="out">
+      <div><strong id="o_head">Result</strong></div>
+      <div class="pill" id="o_rain"></div>
+      <div style="margin-top:10px"><strong id="o_mm"></strong></div>
+      <div style="margin-top:6px" id="o_cat"></div>
+      <div style="margin-top:8px" id="o_advice"></div>
+      <div class="k" id="o_note"></div>
+    </div>
 
-<div class="response" id="response" style="display:none;"></div>
-
-</div>
+    <p class="k" id="foot">
+      Note: This pilot version uses a transparent scoring model for quick field testing. We can replace it with your ANN later without changing the interface.
+    </p>
+  </div>
 
 <script>
-function generateAdvice() {
-    const crop = document.getElementById("crop").value;
-    const issue = document.getElementById("issue").value;
-    const responseDiv = document.getElementById("response");
+  let lang = "EN";
 
-    let advice = "";
+  const T = {
+    EN: {
+      title: "AI4RPT Demo — Rainfall Prediction",
+      subtitle: "Pilot tool for co-building with farmers (demo logic)",
+      hum:"Humidity (%)", temp:"Temperature (°C)", frost:"Frost-free days", yld:"Crop yield (any unit)",
+      predict:"Predict", result:"Result",
+      yesRain:"Rain expected", noRain:"No rain expected",
+      est:"Estimated rainfall:", cat:"Category:", advice:"Advice:",
+      note:"Pilot logic: best for demonstrations & feedback. Next step: replace with trained ANN for your location."
+    },
+    FR: {
+      title: "AI4RPT Démo — Prévision de pluie",
+      subtitle: "Outil pilote pour co-construction avec les agriculteurs (logique démo)",
+      hum:"Humidité (%)", temp:"Température (°C)", frost:"Jours sans gel", yld:"Rendement (toute unité)",
+      predict:"Prédire", result:"Résultat",
+      yesRain:"Pluie prévue", noRain:"Aucune pluie prévue",
+      est:"Pluie estimée :", cat:"Catégorie :", advice:"Conseil :",
+      note:"Logique pilote : idéale pour démos & retours terrain. Prochaine étape : remplacer par un ANN entraîné localement."
+    }
+  };
 
-    if(issue.toLowerCase().includes("yellow")) {
-        advice = "Yellow leaves may indicate nutrient deficiency. Consider nitrogen fertilizer and check soil drainage.";
-    } else if(issue.toLowerCase().includes("insect")) {
-        advice = "Possible pest infestation. Inspect leaves carefully and consider safe pesticide or neem-based treatment.";
-    } else if(issue.toLowerCase().includes("low yield")) {
-        advice = "Low yield may result from poor soil fertility or irregular rainfall. Consider soil testing and improved seed variety.";
-    } else {
-        advice = "Thank you. We recommend field inspection and local agronomist consultation for more accurate diagnosis.";
+  function setLang(newLang){
+    lang = newLang;
+    document.getElementById("langBtn").textContent = lang;
+    const L = T[lang];
+    document.getElementById("title").textContent = L.title;
+    document.getElementById("subtitle").textContent = L.subtitle;
+    document.getElementById("l_hum").textContent = L.hum;
+    document.getElementById("l_temp").textContent = L.temp;
+    document.getElementById("l_frost").textContent = L.frost;
+    document.getElementById("l_yield").textContent = L.yld;
+    document.getElementById("predictBtn").textContent = L.predict;
+    document.getElementById("o_head").textContent = L.result;
+    document.getElementById("o_note").textContent = L.note;
+  }
+
+  document.getElementById("langBtn").addEventListener("click", ()=>{
+    setLang(lang === "EN" ? "FR" : "EN");
+  });
+
+  // ---- Demo predictor (transparent scoring) ----
+  // Inputs: humidity, temperature, frost-free days, crop yield
+  // Output: rain yes/no + estimated mm if yes
+  function predictDemo(h, t, f, y){
+    // Normalize roughly into comparable ranges (simple, robust)
+    const hn = clamp(h, 0, 100) / 100;     // 0..1
+    const tn = clamp(t, 0, 45) / 45;       // 0..1
+    const fn = clamp(f, 0, 40) / 40;       // 0..1
+    const yn = clamp(y, 0, 500) / 500;     // 0..1 (wide range)
+
+    // Heuristic score (calibrated for demo behavior)
+    // Higher humidity + moderate temps + more frost-free days + better yield proxy -> higher rain likelihood
+    const score = (0.55*hn) + (0.20*tn) + (0.15*fn) + (0.10*yn);
+
+    // Decision threshold
+    const willRain = score >= 0.55;
+
+    // Estimated mm (bounded)
+    let mm = 0;
+    if (willRain){
+      // Convert score to mm scale: 5..60
+      mm = Math.round(5 + (score - 0.55) * (60 - 5) / (1 - 0.55));
+      mm = clamp(mm, 5, 60);
     }
 
-    responseDiv.style.display = "block";
-    responseDiv.innerHTML = "<strong>Crop:</strong> " + crop + "<br><br><strong>Advice:</strong><br>" + advice;
-}
-</script>
+    return {willRain, mm, score};
+  }
 
+  function category(mm){
+    if (mm === 0) return {EN:"No rain", FR:"Pas de pluie"};
+    if (mm <= 10) return {EN:"Light", FR:"Légère"};
+    if (mm <= 30) return {EN:"Moderate", FR:"Modérée"};
+    return {EN:"Heavy", FR:"Forte"};
+  }
+
+  function advice(mm){
+    if (mm === 0) return {
+      EN:"Consider irrigation planning and mulch to conserve soil moisture.",
+      FR:"Envisagez l'irrigation et le paillage pour conserver l'humidité du sol."
+    };
+    if (mm <= 10) return {
+      EN:"Suitable for light field operations. Monitor early weeds after rain.",
+      FR:"Adapté aux travaux légers. Surveillez les mauvaises herbes après la pluie."
+    };
+    if (mm <= 30) return {
+      EN:"Ensure drainage. Avoid applying fertilizer immediately before rainfall.",
+      FR:"Assurez le drainage. Évitez d'appliquer l'engrais juste avant la pluie."
+    };
+    return {
+      EN:"Risk of waterlogging/erosion. Delay fertilizer/spraying; secure stored produce.",
+      FR:"Risque d'engorgement/érosion. Reporter engrais/pulvérisation; sécuriser les récoltes stockées."
+    };
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  document.getElementById("predictBtn").addEventListener("click", ()=>{
+    const h = parseFloat(document.getElementById("humidity").value || "0");
+    const t = parseFloat(document.getElementById("temperature").value || "0");
+    const f = parseFloat(document.getElementById("frost").value || "0");
+    const y = parseFloat(document.getElementById("yield").value || "0");
+
+    const L = T[lang];
+    const out = document.getElementById("out");
+    out.style.display = "block";
+
+    const pred = predictDemo(h,t,f,y);
+
+    document.getElementById("o_rain").textContent = pred.willRain ? L.yesRain : L.noRain;
+
+    if (!pred.willRain){
+      document.getElementById("o_mm").textContent = "";
+      document.getElementById("o_cat").textContent = "";
+      document.getElementById("o_advice").innerHTML = "<strong>"+L.advice+"</strong> " + advice(0)[lang];
+    } else {
+      const catObj = category(pred.mm);
+      document.getElementById("o_mm").textContent = `${L.est} ${pred.mm} mm`;
+      document.getElementById("o_cat").innerHTML = `<strong>${L.cat}</strong> ${catObj[lang]}`;
+      document.getElementById("o_advice").innerHTML = "<strong>"+L.advice+"</strong> " + advice(pred.mm)[lang];
+    }
+
+    document.getElementById("o_note").textContent = L.note;
+  });
+
+  setLang("EN");
+</script>
 </body>
 </html>
