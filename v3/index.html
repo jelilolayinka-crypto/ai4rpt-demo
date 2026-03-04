@@ -1,1 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI4RPT Pilot (V3) — Rain Onset & Season Guidance</title>
+  <style>
+    :root { --g:#1b5e20; --bg:#f4f6f8; --card:#fff; --muted:#6b7280; --warn:#b45309; --danger:#b91c1c; --ok:#065f46; }
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;padding:18px;}
+    .wrap{max-width:760px;margin:0 auto;background:var(--card);border-radius:14px;box-shadow:0 8px 18px rgba(0,0,0,.08);padding:18px 18px 22px;}
+    header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+    h1{margin:0;color:var(--g);font-size:22px;line-height:1.2;}
+    .sub{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.35;}
+    .lang{margin-left:auto;border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+    label{display:block;font-size:13px;color:#111827;margin:4px 0 6px;}
+    input,select{width:100%;padding:12px 12px;border:1px solid #e5e7eb;border-radius:12px;font-size:15px;outline:none;}
+    .full{grid-column:1/-1;}
+    .btn{margin-top:14px;width:100%;background:var(--g);color:#fff;border:none;border-radius:12px;padding:14px 14px;font-size:16px;cursor:pointer;font-weight:700;}
+    .btn:hover{filter:brightness(.95)}
+    .cards{margin-top:14px;display:grid;grid-template-columns:1fr;gap:10px;}
+    .card{border:1px solid #e5e7eb;border-radius:14px;padding:14px;background:#fff;}
+    .k{color:var(--muted);font-size:12px;margin:0 0 6px;}
+    .v{font-size:16px;margin:0;font-weight:800;color:#111827;}
+    .tag{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+    .ok{background:#dcfce7;color:var(--ok);border:1px solid #bbf7d0;}
+    .warn{background:#ffedd5;color:var(--warn);border:1px solid #fed7aa;}
+    .danger{background:#fee2e2;color:var(--danger);border:1px solid #fecaca;}
+    .notes{margin-top:10px;color:#111827;font-size:13px;line-height:1.45;}
+    .muted{color:var(--muted);}
+    .footer{margin-top:14px;font-size:12px;color:var(--muted);}
+    @media (max-width:720px){ .grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1 id="t_title">AI4RPT Pilot (V3) — Rain Onset & Season Guidance</h1>
+        <div class="sub" id="t_sub">
+          Farmer-friendly pilot for co-building. Uses simple rules + local signals (not official meteorological forecasts).
+        </div>
+      </div>
+      <button class="lang" id="langBtn">EN</button>
+    </header>
 
+    <div class="grid">
+      <div>
+        <label id="t_state">State</label>
+        <input id="state" placeholder="e.g., Osun" />
+      </div>
+
+      <div>
+        <label id="t_lga">LGA</label>
+        <input id="lga" placeholder="e.g., Atakumosa East" />
+      </div>
+
+      <div>
+        <label id="t_comm">Community / Village</label>
+        <input id="comm" placeholder="e.g., Ilesha" />
+      </div>
+
+      <div>
+        <label id="t_crop">Crop</label>
+        <select id="crop">
+          <option value="maize">Maize</option>
+          <option value="rice">Rice</option>
+          <option value="cassava">Cassava</option>
+          <option value="yam">Yam</option>
+          <option value="vegetables" selected>Vegetables</option>
+          <option value="groundnut">Groundnut</option>
+          <option value="soybean">Soybean</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_month">Current month</label>
+        <select id="month">
+          <option>January</option><option>February</option><option>March</option><option>April</option>
+          <option>May</option><option>June</option><option>July</option><option>August</option>
+          <option>September</option><option>October</option><option>November</option><option>December</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_zone">Agro-ecological zone (simple)</label>
+        <select id="zone">
+          <option value="forest" selected>Forest / Derived savannah (South)</option>
+          <option value="middle">Middle belt (North-central)</option>
+          <option value="sahel">Sudan/Sahel (Far North)</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_early">Have early rains started?</label>
+        <select id="early">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+          <option value="unsure" selected>Not sure</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_drybreaks">Do early rains stop again (dry breaks)?</label>
+        <select id="drybreaks">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+          <option value="unsure" selected>Not sure</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_soil">Current soil condition</label>
+        <select id="soil">
+          <option value="dry" selected>Dry</option>
+          <option value="moist">Moist</option>
+          <option value="wet">Wet / waterlogged</option>
+          <option value="unsure">Not sure</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="t_rains">How many rainy days in the last 14 days?</label>
+        <select id="rains14">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
+          <option value="3">3</option>
+          <option value="4">4+</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <button class="btn" id="btn">Get Rain & Planting Guidance</button>
+      </div>
+    </div>
+
+    <div class="cards" id="out" style="display:none;">
+      <div class="card">
+        <p class="k" id="t_onset_k">Estimated rain onset</p>
+        <p class="v" id="onset_v">—</p>
+        <span class="tag" id="onset_tag"></span>
+      </div>
+
+      <div class="card">
+        <p class="k" id="t_stable_k">Estimated stable planting window</p>
+        <p class="v" id="stable_v">—</p>
+        <span class="tag" id="stable_tag"></span>
+      </div>
+
+      <div class="card">
+        <p class="k" id="t_length_k">Estimated rainy season length</p>
+        <p class="v" id="length_v">—</p>
+        <span class="tag" id="length_tag"></span>
+      </div>
+
+      <div class="card">
+        <p class="k" id="t_advice_k">Practical advice</p>
+        <div class="notes" id="advice_v"></div>
+      </div>
+
+      <div class="footer" id="t_footer">
+        Note: This is a pilot advisory tool for co-building with farmers and extension agents. It is not an official weather forecast.
+      </div>
+    </div>
+  </div>
+
+<script>
+  const L = {
+    en: {
+      title: "AI4RPT Pilot (V3) — Rain Onset & Season Guidance",
+      sub: "Farmer-friendly pilot for co-building. Uses simple rules + local signals (not official meteorological forecasts).",
+      state:"State", lga:"LGA", comm:"Community / Village", crop:"Crop", month:"Current month",
+      zone:"Agro-ecological zone (simple)",
+      early:"Have early rains started?", drybreaks:"Do early rains stop again (dry breaks)?",
+      soil:"Current soil condition", rains:"How many rainy days in the last 14 days?",
+      btn:"Get Rain & Planting Guidance",
+      onset_k:"Estimated rain onset",
+      stable_k:"Estimated stable planting window",
+      length_k:"Estimated rainy season length",
+      advice_k:"Practical advice",
+      footer:"Note: This is a pilot advisory tool for co-building with farmers and extension agents. It is not an official weather forecast.",
+      tags:{high:"High confidence", med:"Moderate confidence", low:"Low confidence"},
+      soilVals:{dry:"Dry", moist:"Moist", wet:"Wet / waterlogged", unsure:"Not sure"},
+      ynu:{yes:"Yes", no:"No", unsure:"Not sure"},
+      zones:{forest:"Forest / Derived savannah (South)", middle:"Middle belt (North-central)", sahel:"Sudan/Sahel (Far North)"},
+      months:["January","February","March","April","May","June","July","August","September","October","November","December"]
+    },
+    fr: {
+      title: "AI4RPT Pilote (V3) — Début des pluies & conseils de saison",
+      sub: "Pilote convivial pour co-construction. Règles simples + signaux locaux (pas une prévision météo officielle).",
+      state:"État", lga:"LGA", comm:"Communauté / Village", crop:"Culture", month:"Mois actuel",
+      zone:"Zone agro-écologique (simple)",
+      early:"Les pluies précoces ont-elles commencé ?", drybreaks:"Les pluies précoces s’arrêtent-elles (pauses sèches) ?",
+      soil:"État actuel du sol", rains:"Nombre de jours de pluie durant les 14 derniers jours ?",
+      btn:"Obtenir le conseil pluie & semis",
+      onset_k:"Estimation du début des pluies",
+      stable_k:"Fenêtre estimée de stabilité pour semer",
+      length_k:"Durée estimée de la saison des pluies",
+      advice_k:"Conseils pratiques",
+      footer:"Note : Outil pilote pour co-construction avec agriculteurs et agents de vulgarisation. Ce n’est pas une prévision officielle.",
+      tags:{high:"Confiance élevée", med:"Confiance moyenne", low:"Confiance faible"},
+      soilVals:{dry:"Sec", moist:"Humide", wet:"Très humide / inondé", unsure:"Pas sûr"},
+      ynu:{yes:"Oui", no:"Non", unsure:"Pas sûr"},
+      zones:{forest:"Forêt / savane dérivée (Sud)", middle:"Ceinture médiane (Centre-Nord)", sahel:"Soudan/Sahel (Extrême Nord)"},
+      months:["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
+    }
+  };
+
+  let lang = "en";
+
+  function setLang(next){
+    lang = next;
+    const T = L[lang];
+    document.documentElement.lang = lang;
+    document.getElementById("langBtn").textContent = (lang==="en"?"EN":"FR");
+
+    document.getElementById("t_title").textContent = T.title;
+    document.getElementById("t_sub").textContent = T.sub;
+
+    document.getElementById("t_state").textContent = T.state;
+    document.getElementById("t_lga").textContent = T.lga;
+    document.getElementById("t_comm").textContent = T.comm;
+    document.getElementById("t_crop").textContent = T.crop;
+    document.getElementById("t_month").textContent = T.month;
+    document.getElementById("t_zone").textContent = T.zone;
+    document.getElementById("t_early").textContent = T.early;
+    document.getElementById("t_drybreaks").textContent = T.drybreaks;
+    document.getElementById("t_soil").textContent = T.soil;
+    document.getElementById("t_rains").textContent = T.rains;
+    document.getElementById("btn").textContent = T.btn;
+
+    document.getElementById("t_onset_k").textContent = T.onset_k;
+    document.getElementById("t_stable_k").textContent = T.stable_k;
+    document.getElementById("t_length_k").textContent = T.length_k;
+    document.getElementById("t_advice_k").textContent = T.advice_k;
+    document.getElementById("t_footer").textContent = T.footer;
+
+    // Update select option labels (keep values)
+    const soil = document.getElementById("soil");
+    [...soil.options].forEach(o => o.text = T.soilVals[o.value] || o.text);
+
+    const early = document.getElementById("early");
+    [...early.options].forEach(o => o.text = T.ynu[o.value] || o.text);
+
+    const dry = document.getElementById("drybreaks");
+    [...dry.options].forEach(o => o.text = T.ynu[o.value] || o.text);
+
+    const zone = document.getElementById("zone");
+    [...zone.options].forEach(o => o.text = T.zones[o.value] || o.text);
+
+    const month = document.getElementById("month");
+    [...month.options].forEach((o,i) => o.text = T.months[i] || o.text);
+  }
+
+  document.getElementById("langBtn").addEventListener("click", ()=>{
+    setLang(lang==="en" ? "fr" : "en");
+  });
+
+  // Month helpers
+  function mi(){ return document.getElementById("month").selectedIndex; } // 0..11
+  function mName(i){ return L[lang].months[(i+12)%12]; }
+
+  // Baseline seasonal pattern by zone (simple Nigeria-oriented heuristics)
+  // These are not "truth"; they're starting points for co-building.
+  const zoneBaseline = {
+    forest: { onset: 2, stable: 3, length: 7 }, // Mar/Apr, ~7 months
+    middle: { onset: 3, stable: 4, length: 6 }, // Apr/May, ~6 months
+    sahel:  { onset: 4, stable: 5, length: 4 }  // May/Jun, ~4 months
+  };
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function confidenceTag(score){
+    const T = L[lang].tags;
+    if(score >= 3) return {cls:"ok", txt:T.high};
+    if(score === 2) return {cls:"warn", txt:T.med};
+    return {cls:"danger", txt:T.low};
+  }
+
+  function fmtRange(startIdx, endIdx){
+    // show month range
+    return `${mName(startIdx)} – ${mName(endIdx)}`;
+  }
+
+  function compute(){
+    const zone = document.getElementById("zone").value;
+    const early = document.getElementById("early").value;
+    const drybreaks = document.getElementById("drybreaks").value;
+    const soil = document.getElementById("soil").value;
+    const rains14 = parseInt(document.getElementById("rains14").value, 10);
+
+    const base = zoneBaseline[zone];
+    let onset = base.onset;   // month index estimate
+    let stable = base.stable; // month index estimate
+    let length = base.length; // months
+
+    // Signals adjustment
+    // Early rains + moist soil + multiple rainy days => onset earlier & stable sooner
+    // Dry breaks + dry soil => stable later
+    let confScore = 1;
+
+    if(early === "yes") { onset -= 1; confScore++; }
+    if(soil === "moist") { onset -= 1; stable -= 1; confScore++; }
+    if(soil === "wet") { stable -= 1; confScore++; }
+    if(rains14 >= 3) { onset -= 1; stable -= 1; confScore++; }
+    if(drybreaks === "yes") { stable += 1; confScore--; }
+    if(soil === "dry") { stable += 1; confScore--; }
+
+    // Keep reasonable bounds
+    onset = clamp(onset, 0, 10);
+    stable = clamp(stable, onset, 11);
+
+    // Rainy season length depends on zone + signals
+    // if dry breaks likely and soil dry, shorten by 1; if wet/moist and rains14 high, lengthen by 1
+    if((drybreaks === "yes" && soil === "dry") || rains14 === 0) length -= 1;
+    if((soil === "wet" || rains14 >= 3) && drybreaks !== "yes") length += 1;
+    length = clamp(length, 3, 8);
+
+    // Create an approximate stable window (2–4 weeks style, represented as month range here)
+    // We'll present stable as a 2-month window centered on stable month.
+    const stableStart = clamp(stable, 0, 11);
+    const stableEnd = clamp(stable + 1, 0, 11);
+
+    // Advice rules (farmer-actionable)
+    const monthNow = mi();
+    const daysSignal = rains14;
+
+    let advice = [];
+    const T = L[lang];
+
+    const onsetPhrase = (lang==="en")
+      ? `Expected onset around ${mName(onset)} (local signals can shift this).`
+      : `Début attendu vers ${mName(onset)} (les signaux locaux peuvent modifier cela).`;
+
+    const stablePhrase = (lang==="en")
+      ? `Safer planting window likely from ${fmtRange(stableStart, stableEnd)}.`
+      : `Fenêtre de semis plus sûre probable de ${fmtRange(stableStart, stableEnd)}.`;
+
+    const lengthPhrase = (lang==="en")
+      ? `Rainy season length estimate: about ${length} month(s).`
+      : `Durée estimée de la saison des pluies : environ ${length} mois.`;
+
+    advice.push(`<div><b>${onsetPhrase}</b></div>`);
+    advice.push(`<div>${stablePhrase}</div>`);
+    advice.push(`<div>${lengthPhrase}</div>`);
+
+    // Action tips
+    if(monthNow < stableStart){
+      advice.push(`<ul>
+        <li>${lang==="en" ? "Start land preparation now (clearing, ridging, nursery preparation)." : "Commencez la préparation du champ (débroussaillage, billonnage, pépinière)."} </li>
+        <li>${lang==="en" ? "Monitor 2–3 consistent rains before planting." : "Surveillez 2–3 pluies régulières avant de semer."}</li>
+      </ul>`);
+    } else if(monthNow >= stableStart && monthNow <= stableEnd){
+      advice.push(`<ul>
+        <li>${lang==="en" ? "Planting can begin if rains are consistent and soil is moist." : "Vous pouvez semer si les pluies sont régulières et le sol humide."}</li>
+        <li>${lang==="en" ? "If you observe dry breaks, delay planting by 1–2 weeks or use staggered planting." : "En cas de pause sèche, retardez de 1–2 semaines ou échelonnez les semis."}</li>
+      </ul>`);
+    } else {
+      advice.push(`<ul>
+        <li>${lang==="en" ? "You may be in mid-season; focus on weeding, fertilizer timing, and drainage where needed." : "Vous êtes peut-être en pleine saison : désherbage, engrais au bon moment, drainage si nécessaire."}</li>
+        <li>${lang==="en" ? "For short-cycle vegetables, consider successive planting based on moisture." : "Pour les légumes à cycle court, envisagez des semis successifs selon l’humidité."}</li>
+      </ul>`);
+    }
+
+    // Extra risk notes
+    if(daysSignal <= 1 && early === "unsure"){
+      advice.push(`<div class="muted">${lang==="en"
+        ? "Tip: Ask nearby farmers or observe water in puddles/streams; local signs improve confidence."
+        : "Astuce : Demandez aux agriculteurs voisins ou observez l’eau (mares, ruisseaux) ; les signes locaux améliorent la confiance."}</div>`);
+    }
+
+    // Confidence mapping: transform confScore to 1..3
+    const conf = clamp(confScore, 1, 3);
+    const tag = confidenceTag(conf);
+
+    return {
+      onsetText: mName(onset),
+      stableText: fmtRange(stableStart, stableEnd),
+      lengthText: (lang==="en") ? `${length} months` : `${length} mois`,
+      tag,
+      adviceHtml: advice.join("")
+    };
+  }
+
+  document.getElementById("btn").addEventListener("click", ()=>{
+    const r = compute();
+    document.getElementById("out").style.display = "grid";
+
+    document.getElementById("onset_v").textContent = r.onsetText;
+    document.getElementById("stable_v").textContent = r.stableText;
+    document.getElementById("length_v").textContent = r.lengthText;
+    document.getElementById("advice_v").innerHTML = r.adviceHtml;
+
+    // tags
+    const onsetTag = document.getElementById("onset_tag");
+    const stableTag = document.getElementById("stable_tag");
+    const lengthTag = document.getElementById("length_tag");
+
+    [onsetTag, stableTag, lengthTag].forEach(el=>{
+      el.className = "tag " + r.tag.cls;
+      el.textContent = r.tag.txt;
+    });
+  });
+
+  // init language + default month to current
+  (function init(){
+    const now = new Date();
+    document.getElementById("month").selectedIndex = now.getMonth();
+    setLang("en");
+  })();
+</script>
+</body>
+</html>
