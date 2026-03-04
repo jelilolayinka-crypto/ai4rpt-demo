@@ -25,5 +25,12 @@
 
     <p><small>If a link shows 404, the folder may not yet contain an <code>index.html</code>.</small></p>
   </div>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js");
+    });
+  }
+</script>
 </body>
 </html>
