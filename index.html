@@ -4,6 +4,8 @@
   <link rel="manifest" href="./manifest.json">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1b5e20">
   <title>AI4RPT Demo</title>
   <style>
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f4f6f8;margin:0;padding:20px}
@@ -31,6 +33,13 @@
       navigator.serviceWorker.register("./service-worker.js");
     });
   }
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
 </script>
 </body>
 </html>
