@@ -33,7 +33,12 @@
           Farmer-friendly pilot for co-building. Uses simple rules (not official meteorological forecasts).
         </p>
       </div>
-      <button class="lang" id="langBtn" type="button">EN</button>
+      <select id="langBtn" onchange="setLang(this.value)" class="lang">
+  <option value="EN">EN</option>
+  <option value="FR">FR</option>
+  <option value="YO">YO</option>
+  <option value="HA">HA</option>
+</select>
     </div>
 
     <div class="grid">
@@ -169,7 +174,7 @@ HA: {
 
   function setLang(newLang){
     lang = newLang;
-    document.getElementById("langBtn").textContent = lang;
+    document.getElementById("langBtn").value = lang;
     const L = T[lang];
     document.getElementById("title").textContent = L.title;
     document.getElementById("subtitle").textContent = L.subtitle;
