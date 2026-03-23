@@ -43,7 +43,12 @@
           Farmer-friendly pilot for co-building. Uses simple rules + local signals (not official meteorological forecasts).
         </div>
       </div>
-      <button class="lang" id="langBtn">EN</button>
+      <select class="lang" id="langBtn" onchange="setLang(this.value)">
+  <option value="en">EN</option>
+  <option value="fr">FR</option>
+  <option value="yo">YO</option>
+  <option value="ha">HA</option>
+</select>
     </header>
 
     <div class="grid">
@@ -206,7 +211,45 @@
       ynu:{yes:"Oui", no:"Non", unsure:"Pas sûr"},
       zones:{forest:"Forêt / savane dérivée (Sud)", middle:"Ceinture médiane (Centre-Nord)", sahel:"Soudan/Sahel (Extrême Nord)"},
       months:["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
-    }
+    },
+    yo: {
+  title: "AI4RPT (V3) — Ìtọ́sọ́nà Ìbẹ̀rẹ̀ Òjò àti Àkókò Ìgbìn",
+  sub: "Àdánwò tó rọrùn fún ìfọwọ́sowọpọ̀ pẹ̀lú àwọn agbẹ. Ó ń lo àwọn òfin rọrùn àti àmì agbègbè (kì í ṣe àsọtẹ́lẹ̀ ojú-ọjọ́ ìjọba).",
+  state:"Ìpínlẹ̀", lga:"Ìjọba Ìbílẹ̀", comm:"Agbègbè / Abúlé", crop:"Irúgbìn", month:"Oṣù yìí",
+  zone:"Agbègbè agro-ecological (rọrùn)",
+  early:"Ṣé òjò àkọ́kọ́ ti bẹ̀rẹ̀?", drybreaks:"Ṣé òjò àkọ́kọ́ máa ń dá dúró lẹ́yìnna?",
+  soil:"Ipò ilẹ̀ báyìí", rains:"Ọjọ́ mélòó ni òjò rọ ní ọjọ́ mẹ́rìnlá tó kọjá?",
+  btn:"Gba Ìtọ́sọ́nà Òjò àti Ìgbìn",
+  onset_k:"Àfihàn ìbẹ̀rẹ̀ òjò",
+  stable_k:"Àkókò tó dáa jù fún ìgbìn",
+  length_k:"Gígùn àkókò òjò tí a fojú sọ́nà",
+  advice_k:"Ìmọ̀ràn tó ṣeé lò",
+  footer:"Àkíyèsí: Èyí jẹ́ irinṣẹ́ ìmọ̀ràn àdánwò fún ìfọwọ́sowọpọ̀ pẹ̀lú àwọn agbẹ àti òṣìṣẹ́ ìtẹ̀síwájú. Kì í ṣe àsọtẹ́lẹ̀ ojú-ọjọ́ ìjọba.",
+  tags:{high:"Ìgbẹ́kẹ̀lé gíga", med:"Ìgbẹ́kẹ̀lé àárín", low:"Ìgbẹ́kẹ̀lé kékeré"},
+  soilVals:{dry:"Gbígbẹ", moist:"Tútù díẹ̀", wet:"Tútù púpọ̀ / kún omi", unsure:"Mi ò dájú"},
+  ynu:{yes:"Bẹ́ẹ̀ni", no:"Rárá", unsure:"Mi ò dájú"},
+  zones:{forest:"Igbo / Derived savannah (Gúúsù)", middle:"Middle belt (Àárín ilẹ̀)", sahel:"Sudan/Sahel (Àríwá jìnna)"},
+  months:["Ṣẹ́rẹ́","Èrèlè","Ẹrẹ̀nà","Ìgbé","Èbìbí","Òkúdu","Agẹmọ","Ògún","Owewe","Ọ̀wàrà","Bélú","Ọ̀pẹ̀"]
+},
+ha: {
+  title: "AI4RPT (V3) — Jagorar Farkon Damina da Lokacin Shuka",
+  sub: "Gwaji ne mai sauƙi don haɗin gwiwa da manoma. Yana amfani da ƙa’idoji masu sauƙi da alamomin yanki (ba hasashen yanayi na hukuma ba).",
+  state:"Jiha", lga:"Karamar Hukuma", comm:"Al’umma / Ƙauye", crop:"Amfanin gona", month:"Watan yanzu",
+  zone:"Yankin noma da muhalli (mai sauƙi)",
+  early:"Shin ruwan farko ya fara?", drybreaks:"Shin ruwan farko yana tsayawa daga baya?",
+  soil:"Yanayin ƙasa a yanzu", rains:"Kwanakin ruwan sama nawa aka samu a cikin kwanaki 14 da suka wuce?",
+  btn:"Sami Jagorar Ruwan Sama da Shuka",
+  onset_k:"Hasashen farkon damina",
+  stable_k:"Lokacin da ya fi dacewa a shuka",
+  length_k:"Tsawon lokacin damina da aka kiyasta",
+  advice_k:"Shawara mai amfani",
+  footer:"Lura: Wannan kayan aikin shawara ne na gwaji don haɗin gwiwa da manoma da jami’an fadakarwa. Ba hasashen yanayi na hukuma ba ne.",
+  tags:{high:"Babban tabbaci", med:"Matsakaicin tabbaci", low:"Ƙaramin tabbaci"},
+  soilVals:{dry:"Busasshe", moist:"Daɗaɗɗe", wet:"Jike sosai / cike da ruwa", unsure:"Ban sani ba"},
+  ynu:{yes:"Eh", no:"A’a", unsure:"Ban sani ba"},
+  zones:{forest:"Daji / Derived savannah (Kudu)", middle:"Middle belt (Tsakiyar ƙasa)", sahel:"Sudan/Sahel (Arewar nesa)"},
+  months:["Janairu","Fabrairu","Maris","Afirilu","Mayu","Yuni","Yuli","Agusta","Satumba","Oktoba","Nuwamba","Disamba"]
+}
   };
 
   let lang = "en";
@@ -215,7 +258,7 @@
     lang = next;
     const T = L[lang];
     document.documentElement.lang = lang;
-    document.getElementById("langBtn").textContent = (lang==="en"?"EN":"FR");
+    document.getElementById("langBtn").value = lang;
 
     document.getElementById("t_title").textContent = T.title;
     document.getElementById("t_sub").textContent = T.sub;
@@ -254,10 +297,6 @@
     const month = document.getElementById("month");
     [...month.options].forEach((o,i) => o.text = T.months[i] || o.text);
   }
-
-  document.getElementById("langBtn").addEventListener("click", ()=>{
-    setLang(lang==="en" ? "fr" : "en");
-  });
 
   // Month helpers
   function mi(){ return document.getElementById("month").selectedIndex; } // 0..11
