@@ -387,29 +387,64 @@ ha: {
     advice.push(`<div>${lengthPhrase}</div>`);
 
     // Action tips
-    if(monthNow < stableStart){
-      advice.push(`<ul>
-        <li>${lang==="en" ? "Start land preparation now (clearing, ridging, nursery preparation)." : "Commencez la préparation du champ (débroussaillage, billonnage, pépinière)."} </li>
-        <li>${lang==="en" ? "Monitor 2–3 consistent rains before planting." : "Surveillez 2–3 pluies régulières avant de semer."}</li>
-      </ul>`);
-    } else if(monthNow >= stableStart && monthNow <= stableEnd){
-      advice.push(`<ul>
-        <li>${lang==="en" ? "Planting can begin if rains are consistent and soil is moist." : "Vous pouvez semer si les pluies sont régulières et le sol humide."}</li>
-        <li>${lang==="en" ? "If you observe dry breaks, delay planting by 1–2 weeks or use staggered planting." : "En cas de pause sèche, retardez de 1–2 semaines ou échelonnez les semis."}</li>
-      </ul>`);
-    } else {
-      advice.push(`<ul>
-        <li>${lang==="en" ? "You may be in mid-season; focus on weeding, fertilizer timing, and drainage where needed." : "Vous êtes peut-être en pleine saison : désherbage, engrais au bon moment, drainage si nécessaire."}</li>
-        <li>${lang==="en" ? "For short-cycle vegetables, consider successive planting based on moisture." : "Pour les légumes à cycle court, envisagez des semis successifs selon l’humidité."}</li>
-      </ul>`);
-    }
-
-    // Extra risk notes
-    if(daysSignal <= 1 && early === "unsure"){
-      advice.push(`<div class="muted">${lang==="en"
-        ? "Tip: Ask nearby farmers or observe water in puddles/streams; local signs improve confidence."
-        : "Astuce : Demandez aux agriculteurs voisins ou observez l’eau (mares, ruisseaux) ; les signes locaux améliorent la confiance."}</div>`);
-    }
+if(monthNow < stableStart){
+  advice.push(`<ul>
+    <li>${
+      lang==="en" ? "Start land preparation now (clearing, ridging, nursery preparation)." :
+      lang==="fr" ? "Commencez la préparation du champ (débroussaillage, billonnage, pépinière)." :
+      lang==="yo" ? "Bẹ̀rẹ̀ sí í mura ilẹ̀ báyìí (fífọ ilẹ̀, ṣíṣe ridging, àti pípèsè nursery)." :
+      "Fara shirya ƙasa yanzu (share fili, yin ridging, da shirya gandun shuka)."
+    }</li>
+    <li>${
+      lang==="en" ? "Monitor 2–3 consistent rains before planting." :
+      lang==="fr" ? "Surveillez 2–3 pluies régulières avant de semer." :
+      lang==="yo" ? "Ṣọ́ra kí o sì tọ́pa 2–3 ìgbà tí òjò bá rọ déédéé kí o tó gbìn." :
+      "A lura da ruwan sama mai daidaito sau 2–3 kafin a shuka."
+    }</li>
+  </ul>`);
+} else if(monthNow >= stableStart && monthNow <= stableEnd){
+  advice.push(`<ul>
+    <li>${
+      lang==="en" ? "Planting can begin if rains are consistent and soil is moist." :
+      lang==="fr" ? "Vous pouvez semer si les pluies sont régulières et le sol humide." :
+      lang==="yo" ? "O lè bẹ̀rẹ̀ sí í gbìn bí òjò bá ń rọ déédéé, tí ilẹ̀ sì tútù." :
+      "Ana iya fara shuka idan ruwan sama yana zuwa a kai a kai kuma ƙasa tana da ɗanɗano."
+    }</li>
+    <li>${
+      lang==="en" ? "If you observe dry breaks, delay planting by 1–2 weeks or use staggered planting." :
+      lang==="fr" ? "En cas de pause sèche, retardez de 1–2 semaines ou échelonnez les semis." :
+      lang==="yo" ? "Tí o bá rí ìdádúró òjò, fa ìgbìn sẹ́yìn fún ọ̀sẹ̀ 1–2 tàbí lo ìgbìn ní ìpele." :
+      "Idan ka ga tsagawar fari, jinkirta shuka da makonni 1–2 ko ka yi shuka a matakai."
+    }</li>
+  </ul>`);
+} else {
+  advice.push(`<ul>
+    <li>${
+      lang==="en" ? "You may be in mid-season; focus on weeding, fertilizer timing, and drainage where needed." :
+      lang==="fr" ? "Vous êtes peut-être en pleine saison : désherbage, engrais au bon moment, drainage si nécessaire." :
+      lang==="yo" ? "Ó ṣeé ṣe kí o ti wà ní àárín àkókò òjò; fojú sí yíyọ ewé, àkókò fífi fertilizer, àti drainage bó bá yẹ." :
+      "Wataƙila kana tsakiyar kakar noma; ka fi hankali kan cire ciyawa, lokacin sanya taki, da magudanar ruwa idan ya cancanta."
+    }</li>
+    <li>${
+      lang==="en" ? "For short-cycle vegetables, consider successive planting based on moisture." :
+      lang==="fr" ? "Pour les légumes à cycle court, envisagez des semis successifs selon l’humidité." :
+      lang==="yo" ? "Fún ẹfọ tó máa ń yára dàgbà, ronú nípa gbíngbin lẹ́ẹ̀kọ̀ọ̀kan gẹ́gẹ́ bí ìtútù ilẹ̀ ṣe rí." :
+      "Ga ganyayyaki masu gajeren zangon girma, a yi la’akari da shuka a jere bisa yanayin danshin ƙasa."
+    }</li>
+  </ul>`);
+}
+   // Extra risk notes
+if(daysSignal <= 1 && early === "unsure"){
+  advice.push(`<div class="muted">${
+    lang==="en"
+      ? "Tip: Ask nearby farmers or observe water in puddles/streams; local signs improve confidence."
+    : lang==="fr"
+      ? "Astuce : Demandez aux agriculteurs voisins ou observez l’eau (mares, ruisseaux) ; les signes locaux améliorent la confiance."
+    : lang==="yo"
+      ? "Àbá: Béèrè lọ́wọ́ àwọn agbẹ tó wà nítòsí tàbí wo omi nínú àpò omi/odo kékeré; àwọn àmì agbègbè máa ń jẹ́ kí ìdánilójú pọ si."
+      : "Shawara: Ka tambayi manoma na kusa ko ka lura da ruwa a cikin tafkuna/rafuka; alamomin yanki suna ƙara tabbaci."
+  }</div>`);
+}
 
     // Confidence mapping: transform confScore to 1..3
     const conf = clamp(confScore, 1, 3);
@@ -418,7 +453,11 @@ ha: {
     return {
       onsetText: mName(onset),
       stableText: fmtRange(stableStart, stableEnd),
-      lengthText: (lang==="en") ? `${length} months` : `${length} mois`,
+      lengthText:
+  lang==="en" ? `${length} months` :
+  lang==="fr" ? `${length} mois` :
+  lang==="yo" ? `${length} oṣù` :
+  `${length} watanni`,
       tag,
       adviceHtml: advice.join("")
     };
