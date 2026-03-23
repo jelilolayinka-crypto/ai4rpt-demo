@@ -370,17 +370,32 @@ ha: {
     let advice = [];
     const T = L[lang];
 
-    const onsetPhrase = (lang==="en")
-      ? `Expected onset around ${mName(onset)} (local signals can shift this).`
-      : `Début attendu vers ${mName(onset)} (les signaux locaux peuvent modifier cela).`;
+    const onsetPhrase =
+  lang==="en"
+    ? `Expected onset around ${mName(onset)} (local signals can shift this).`
+  : lang==="fr"
+    ? `Début attendu vers ${mName(onset)} (les signaux locaux peuvent modifier cela).`
+  : lang==="yo"
+    ? `A ń retí ìbẹ̀rẹ̀ òjò ní àgbègbè ${mName(onset)} (àwọn àmì agbègbè lè yí èyí padà).`
+    : `Ana sa ran farkon damina kusan ${mName(onset)} (alamomin yanki na iya canza wannan).`;
 
-    const stablePhrase = (lang==="en")
-      ? `Safer planting window likely from ${fmtRange(stableStart, stableEnd)}.`
-      : `Fenêtre de semis plus sûre probable de ${fmtRange(stableStart, stableEnd)}.`;
+const stablePhrase =
+  lang==="en"
+    ? `Safer planting window likely from ${fmtRange(stableStart, stableEnd)}.`
+  : lang==="fr"
+    ? `Fenêtre de semis plus sûre probable de ${fmtRange(stableStart, stableEnd)}.`
+  : lang==="yo"
+    ? `Àkókò tó dáa jù fún ìgbìn lè jẹ́ láti ${fmtRange(stableStart, stableEnd)}.`
+    : `Lokacin da ya fi dacewa a shuka na iya kasancewa daga ${fmtRange(stableStart, stableEnd)}.`;
 
-    const lengthPhrase = (lang==="en")
-      ? `Rainy season length estimate: about ${length} month(s).`
-      : `Durée estimée de la saison des pluies : environ ${length} mois.`;
+const lengthPhrase =
+  lang==="en"
+    ? `Rainy season length estimate: about ${length} month(s).`
+  : lang==="fr"
+    ? `Durée estimée de la saison des pluies : environ ${length} mois.`
+  : lang==="yo"
+    ? `Àfojúsùn gígùn àkókò òjò: bíi oṣù ${length}.`
+    : `Hasashen tsawon lokacin damina: kusan watanni ${length}.`;
 
     advice.push(`<div><b>${onsetPhrase}</b></div>`);
     advice.push(`<div>${stablePhrase}</div>`);
