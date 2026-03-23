@@ -193,12 +193,7 @@ HA: {
     document.getElementById("o_next_label").textContent = L.next;
     document.getElementById("o_note").textContent = L.note;
   }
-
-  document.getElementById("langBtn").addEventListener("click", ()=>{
-    setLang(lang === "EN" ? "FR" : "EN");
-  });
-
-  // --- Pilot rule engine (A-version): outputs actionable guidance ---
+   // --- Pilot rule engine (A-version): outputs actionable guidance ---
   function guidance(month, earlyRains, dryBreaks, soil, crop){
     // Month to season stage (Nigeria-like pattern; this is pilot logic)
     const m = month.toLowerCase();
