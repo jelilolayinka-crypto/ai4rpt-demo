@@ -1,4 +1,4 @@
-const CACHE_NAME = "ai4rpt-cache-v3";
+const CACHE_NAME = "ai4rpt-cache-v4";
 const PRECACHE_URLS = [
   "/ai4rpt-demo/",
   "/ai4rpt-demo/index.html",
